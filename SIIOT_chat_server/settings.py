@@ -39,8 +39,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'chat'
 ]
+
+# apps
+SECONDS_APPS = [
+    'chat',
+    'accounts'
+]
+
+# package
+THIRD_APPS = [
+    'rest_framework'
+]
+
+INSTALLED_APPS += SECONDS_APPS + THIRD_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -77,17 +89,12 @@ WSGI_APPLICATION = 'SIIOT_chat_server.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    },
-    'siiot_database': load_credential('siiot_database'),
+    'default': load_credential('siiot_database')
 }
 
-# router
-DATABASE_ROUTERS = [
-    'siiot.router.SiiotchatRouter'
-]
+# Default user model
+AUTH_USER_MODEL = 'accounts.User'
+
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
