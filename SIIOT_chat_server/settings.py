@@ -55,7 +55,8 @@ INSTALLED_APPS = [
 SECONDS_APPS = [
     'channels',
     'chat',
-    'accounts'
+    'accounts',
+    'payment'
 ]
 
 # package
