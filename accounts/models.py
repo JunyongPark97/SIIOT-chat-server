@@ -1,6 +1,11 @@
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import PermissionsMixin
+
+
+def img_directory_path_profile(instance, filename):
+    return 'user/{}/profile/{}'.format(instance.user.nickname, filename)
 
 
 class UserManager(BaseUserManager):
@@ -62,3 +67,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         managed = False
         db_table = 'accounts_user'
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name="profile", on_delete=models.CASCADE)
+    profile_img = models.ImageField(upload_to=img_directory_path_profile,
+                                    default='default_profile.png')
+
+    @property
+    def profile_image_url(self):
+        return self.profile_img.url
+
+    class Meta:
+        managed = False
+        db_table = 'accounts_profile'

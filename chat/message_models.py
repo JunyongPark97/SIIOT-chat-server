@@ -117,18 +117,6 @@ class MessageTmplBase(Serializable):
         instance = serializer.update(chat_msg, serializer.validated_data)
         return instance
 
-    def fake(self):
-        """
-        save하지 않은 ChatMessage 객체를 만듭니다.
-        :return: ChatMessage object (doesn't have pk value)
-        """
-        serializer = ChatMessageWriteSerializer(data=self)
-        serializer.is_valid(raise_exception=True)
-        instance = ChatMessage(**serializer.validated_data)
-        if self.created_at:
-            instance.created_at = self.created_at  # serializer doesn't write created_at, so set it manually
-        return instance
-
 
 class TextMessageMixin(object):
     @property
@@ -169,10 +157,6 @@ class ImageChatMessageTmpl(MessageTmplBase, ImageMessageMixin):
             if isinstance(image_key, UUID):
                 image_key = str(image_key)
             self.image_key = image_key
-        if content_url:
-            self.content_url = content_url
-        self.extras = {'caption': caption}  # this line was mistake; DEPRECATED
-        self.caption = caption
 
 
 class ButtonsMessageTmpl(MessageTmplBase):
