@@ -3,7 +3,6 @@
 import re
 
 from django.contrib.auth import get_user_model
-from django.contrib.sites.models import Site
 from rest_framework import serializers
 
 User = get_user_model()
@@ -18,11 +17,7 @@ class ChatRoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChatRoom
-        fields = ('id', 'buyer', 'seller', 'websocket_url')
-
-    def get_websocket_url(self, instance):
-        domain = Site.objects.get(name='chat').domain
-        return 'ws://{domain}/chat/{pk}/'.format(domain=domain, pk=instance.id)
+        fields = ('id', 'buyer', 'seller')
 
 
 class ChatUserSerializer(serializers.ModelSerializer):
@@ -89,3 +84,31 @@ class ChatMessageWriteSerializer(serializers.ModelSerializer):
             # 'is_hidden',
         )
 
+
+class MessageSerializer(serializers.ModelSerializer):
+    user_username = serializers.ReadOnlyField(source='user.username')
+    user_uuid = serializers.ReadOnlyField(source='user.uuid')
+    chat_uuid = serializers.ReadOnlyField(source='chat.uuid')
+    from_current_user = serializers.SerializerMethodField(allow_null=True)
+
+    class Meta:
+        model = ChatMessage
+        fields = ('uuid', 'chat_uuid', 'user_username', 'user_uuid', 'created', 'text', 'from_current_user')
+
+    def get_from_current_user(self, message):
+        if 'request' in self.context:
+            return self.context['request'].user == message.user
+        return None
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    messages = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChatRoom
+        fields = ('uuid', 'messages',)
+
+    def get_messages(self, chat):
+        qs = ChatMessage.objects.filter(chat=chat).order_by('-created')[0:10]
+        serializer = MessageSerializer(instance=qs, many=True, context=self.context)
+        return serializer.data
