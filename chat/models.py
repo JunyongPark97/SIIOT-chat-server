@@ -11,7 +11,6 @@ def img_directory_path_message(instance, filename):
 
 
 class ChatRoom(models.Model):
-    room_type = models.CharField(max_length=30, db_index=True, help_text='채팅방 유형')
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, related_name='seller_chat_rooms',
                                on_delete=models.SET_NULL)
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, related_name='buyer_chat_rooms',
@@ -37,6 +36,13 @@ class ChatMessage(models.Model):
     message_image = models.ImageField(null=True, blank=True, upload_to=img_directory_path_message)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        import datetime
+        self.created_at = datetime.datetime.now()
 
     # source(=author) fields
     # 추후 업데이트는 SIIOT BOT이 CARD 형태로 전달하기 때문에 source_type 봇 추가 필요
