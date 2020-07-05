@@ -1,75 +1,61 @@
-import json, uuid
+import json
+
+from channels.generic.websocket import AsyncWebsocketConsumer
+from chat.models import ChatRoom, ChatMessage
+from chat.serializers import ChatMessageSerializer
+
+from .utils import add_user_as_active_websocket, add_user_as_inactive_websocket
+from .exceptions import UserNotLoggedInError
 
 from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
-
-from .utils import add_user_as_active_websocket, add_user_as_inactive_websocket, construct_group_name_from_uuid
-from .exceptions import ChatClientError, UserNotLoggedInError
+from asgiref.sync import async_to_sync
 
 
 # - NOTE: ALL channel_layer methods are asynchronous
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Get the user object (provided by the TokenAuthMiddleware in mysite/routing.py)
-        self.user = self.scope["user"]
+        # Get the user object (provided by the TokenAuthMiddleware in SIIOT_chat_server/routing.py)
+        # self.user = self.scope["user"]
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        # if self.user.is_anonymous:
+        #     await self.close()
 
-        if self.user.is_anonymous:
-            await self.close()
-
-        self.user_group_name = construct_group_name_from_uuid(self.user.uuid)
+        self.room_group_name = 'chat_%s' % str(self.room_name)
 
         await self.channel_layer.group_add(
-            self.user_group_name,
-            self.channel_name  # I believe 'channel_name' is a unique name given per Consumer instance
+            self.room_group_name,
+            self.channel_name
         )
 
-        await add_user_as_active_websocket(self.user)
+        # await add_user_as_active_websocket(self.user)
 
         await self.accept()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
-            self.user_group_name,
+            self.room_group_name,
             self.channel_name
         )
-        await add_user_as_inactive_websocket(self.user)
+        # await add_user_as_inactive_websocket(self.user)
 
     # Receive message from WebSocket
     async def receive(self, text_data=None, bytes_data=None):
-        data_serialized = json.loads(text_data)
 
-        # Messages will have a "command" key we can switch on
-        # CLIENT ensures that the JSON they send back has this key with a valid value
-        command = data_serialized.get("command", None)
-        try:
-            if command == "send_message":
-                await self.send_message(data_serialized)
-        except ChatClientError as e:
-            # Catch any errors and send it back to the client
-            await self.send(text_data=e.instanceVariablesToJsonString())
+        # if not self.user.is_authenticated:
+        #     raise UserNotLoggedInError()
 
-    ##### Command helper methods called by receive()
+        text_data_json = json.loads(text_data)
+        message = text_data_json.get("message", None)
 
-    async def send_message(self, data_serialized):
-        destination_user_uuid = data_serialized['receiver_uuid']
+        serializer = ChatMessageSerializer(data=text_data_json)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        if not self.user.is_authenticated:
-            raise UserNotLoggedInError()
-
-        destination_group_name = construct_group_name_from_uuid( destination_user_uuid)
-
-        # Send message to room group - an event has a special 'type' key corresponding to the name of the method that
-        # should be invoked on consumers that receive the event.
         await self.channel_layer.group_send(
-            destination_group_name,
+            self.room_group_name,
             {
-                'type': 'chat_message',  # so that 'chat_message' method below will be invoked on receiving consumers
-                'uuid': data_serialized['uuid'],
-                'chat_uuid': data_serialized['chat_uuid'],
-                'sender_uuid': data_serialized['sender_uuid'],
-                'sender_username': data_serialized['sender_username'],
-                'date': data_serialized['date'],
-                'message': data_serialized['message']
+                'type': 'chat_message',
+                'message': message
             }
         )
 
