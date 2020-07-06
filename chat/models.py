@@ -3,8 +3,6 @@ from django.conf import settings
 
 from payment.models import Deal
 
-import jsonfield
-
 
 def img_directory_path_message(instance, filename):
     return 'chatroom/{}/message/{}'.format(instance.room.id, filename)
@@ -22,42 +20,17 @@ class ChatRoom(models.Model):
 
 
 class ChatMessage(models.Model):
-    # normal fields
     MESSAGE_TYPES = (
         # 추후 업데이트는 SIIOT BOT이 CARD 형태로 전달하기 떄문에 message_type을 늘리거나 action_code 작성 필요
         (1, 'text'),
         (2, 'image')
-        # (3, 'templates'),
-        # (4, 'postback'),
     )
     message_type = models.IntegerField(choices=MESSAGE_TYPES, db_index=True)
     room = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE)
     text = models.TextField()
     message_image = models.ImageField(null=True, blank=True, upload_to=img_directory_path_message)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    is_read = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False, help_text='상대방 입장에서 web socket 접속할 때 바뀌는 field')
 
     class Meta:
-        ordering = ['-created_at']
-
-    def save(self, *args, **kwargs):
-        import datetime
-        self.created_at = datetime.datetime.now()
-
-    # source(=author) fields
-    # 추후 업데이트는 SIIOT BOT이 CARD 형태로 전달하기 때문에 source_type 봇 추가 필요
-    # SOURCE_TYPES = (
-    #     (1, 'user'),
-    #     (2, 'bot')
-    # )
-    # source_type = models.IntegerField(choices=SOURCE_TYPES, db_index=True)
-
-    # template data fields
-    # template = jsonfield.JSONField(default=dict)
-
-    # target fields
-    # target_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='targeted_chat_messages',
-    #                                 blank=True, null=True, on_delete=models.SET_NULL)
-    # is_hidden = models.BooleanField(default=True)
-
-
+        ordering = ['created_at']
