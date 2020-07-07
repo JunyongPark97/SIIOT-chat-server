@@ -1,4 +1,6 @@
 from chat.models import ChatRoom
+from asgiref.sync import async_to_sync, sync_to_async
+import json
 
 
 class MessageSender(object):
@@ -17,12 +19,14 @@ class MessageSender(object):
     def room(self):
         return ChatRoom.objects.get(id=self.room_id)
 
-    async def deliver_message(self, chat_msg, immediately=False):
+    def deliver_message(self, chat_msg, immediately=False):
 
-        await self.channel_layer.group_send(
+        self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
                 'message': chat_msg
             }
         )
+
+
