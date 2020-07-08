@@ -17,7 +17,7 @@ class TokenAuthMiddleware:
         if 'Authorization' in headers:
             try:
                 token_name, token_key = headers['Authorization'].decode().split()
-                if "token" in token_name:
+                if "Token" in token_name:
                     token = Token.objects.get(key=token_key)
                     scope['user'] = token.user
                     close_old_connections()

@@ -7,14 +7,6 @@ from chat.serializers import ChatMessageSerializer
 from .utils import add_user_as_active_websocket, add_user_as_inactive_websocket
 from .exceptions import UserNotLoggedInError
 
-from channels.db import database_sync_to_async
-from asgiref.sync import async_to_sync, sync_to_async
-
-@database_sync_to_async
-async def Test(serializer):
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-
 
 # - NOTE: ALL channel_layer methods are asynchronous
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -48,6 +40,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # if not self.user.is_authenticated:
         #     raise UserNotLoggedInError()
+        print(text_data)
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
@@ -62,11 +55,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # Receive chat_message from room group and send down to client(s)
     async def chat_message(self, message):
-        await self._send_consumer_event_to_client(
+        await self._send_consumer_to_client(
             event=message
         )
 
     # The following is called by the CONSUMER to send the message to the CLIENT
-    async def _send_consumer_event_to_client(self, event):
+    async def _send_consumer_to_client(self, event):
         await self.send(text_data=json.dumps(event))
 
