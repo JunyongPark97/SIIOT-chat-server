@@ -12,10 +12,10 @@ from .exceptions import UserNotLoggedInError
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # Get the user object (provided by the TokenAuthMiddleware in SIIOT_chat_server/routing.py)
-        # self.user = self.scope["user"]
+        self.user = self.scope["user"]
         self.room_name = self.scope['url_route']['kwargs']['room_name']
-        # if self.user.is_anonymous:
-        #     await self.close()
+        if self.user.is_anonymous:
+            await self.close()
 
         self.room_group_name = 'chat_%s' % str(self.room_name)
 
@@ -24,7 +24,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-        # await add_user_as_active_websocket(self.user)
+        await add_user_as_active_websocket(self.user)
 
         await self.accept()
 
@@ -33,13 +33,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        # await add_user_as_inactive_websocket(self.user)
+        await add_user_as_inactive_websocket(self.user)
 
     # Receive message from WebSocket
     async def receive(self, text_data=None, bytes_data=None):
 
-        # if not self.user.is_authenticated:
-        #     raise UserNotLoggedInError()
+        if not self.user.is_authenticated:
+            raise UserNotLoggedInError()
         print(text_data)
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
