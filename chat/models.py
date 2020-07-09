@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from core.fields import S3ImageKeyField
 
 from payment.models import Deal
 
@@ -25,12 +26,21 @@ class ChatMessage(models.Model):
         (1, 'text'),
         (2, 'image')
     )
-    message_type = models.IntegerField(choices=MESSAGE_TYPES, db_index=True)
+    message_type = models.IntegerField(choices=MESSAGE_TYPES, db_index=True, default=1)
     room = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE)
     text = models.TextField()
-    message_image = models.ImageField(null=True, blank=True, upload_to=img_directory_path_message)
+    # message_image = models.ImageField(null=True, blank=True, upload_to=img_directory_path_message)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     is_read = models.BooleanField(default=False, help_text='상대방 입장에서 web socket 접속할 때 바뀌는 field')
 
     class Meta:
         ordering = ['created_at']
+
+
+class ChatMessageImages(models.Model):
+    message = models.ForeignKey(ChatMessage, related_name="images", on_delete=models.CASCADE)
+    image_key = S3ImageKeyField()
+
+    @property
+    def image_url(self):
+        return self.image_key.url

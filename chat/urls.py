@@ -11,5 +11,7 @@ router.register('chat', ChatMessageViewSet)
 
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    url(r'^chat/$', views.index, name='index'),
+    url(r'^chat/(?P<room_name>[^/]+)/$', views.room, name='room'),
 ]
