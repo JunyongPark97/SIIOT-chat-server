@@ -2,7 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=git,python,django
 
 migrations/
-
+server_info.json
 ### stuff ###
 .DS_Store
 .idea/
