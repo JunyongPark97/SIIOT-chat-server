@@ -49,21 +49,30 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites'
 ]
 
 # apps
 SECONDS_APPS = [
     'channels',
+    'custom_manage',
     'chat',
     'accounts',
     'payment',
+    'products',
+    'products.category',
+    'products.shopping_mall',
+    'products.supplymentary',
     'realtime',
     'common'
 ]
 
 # package
 THIRD_APPS = [
-    'rest_framework'
+    'rest_framework',
+    'rest_framework.authtoken',
+
+    'corsheaders',
 ]
 
 INSTALLED_APPS += SECONDS_APPS + THIRD_APPS
@@ -95,6 +104,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'SIIOT_chat_server.wsgi.application'
 
@@ -140,6 +150,7 @@ USE_L10N = True
 
 USE_TZ = False
 
+SITE_ID = 1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -149,7 +160,7 @@ STATIC_URL = '/static/'
 # Rest Framework - settings for pagination
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 20,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),

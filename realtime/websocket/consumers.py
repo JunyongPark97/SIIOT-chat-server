@@ -2,7 +2,7 @@ import json
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from chat.models import ChatRoom, ChatMessage
-from chat.serializers import ChatMessageSerializer
+from chat.serializers import ChatMessageReadSerializer, ChatMessageWriteSerializer
 
 from .utils import add_user_as_active_websocket, add_user_as_inactive_websocket
 from .exceptions import UserNotLoggedInError

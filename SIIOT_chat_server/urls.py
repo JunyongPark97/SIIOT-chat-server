@@ -16,8 +16,10 @@ Including another URLconf
 from django.conf.urls import include
 from django.contrib import admin
 from django.urls import path
+from custom_manage.sites import staff_panel
 
 urlpatterns = [
     path('', include('chat.urls')),
+    path('staff/', staff_panel.urls, name='staff'),
     path('admin/', admin.site.urls),
 ]

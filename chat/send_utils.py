@@ -12,12 +12,12 @@ def send_new_message(channel_layer, room_group_name, message):
     )
 
 
-def send_new_image(channel_layer, room_group_name, message):
+def send_new_image(channel_layer, room_group_name, image):
     async_to_sync(channel_layer.group_send)(
         room_group_name,
         {
             'type': 'chat_image',
-            'message': message
+            'image': image
         }
     )
 
@@ -38,8 +38,8 @@ class MessageSender(object):
     def deliver_message(self, chat_msg):
         send_new_message(self.channel_layer, self.room_group_name, chat_msg)
 
-    def deliver_image(self, chat_msg):
-        send_new_message(self.channel_layer, self.room_group_name, chat_msg)
+    def deliver_image(self, chat_img):
+        send_new_image(self.channel_layer, self.room_group_name, chat_img)
 
 
 
