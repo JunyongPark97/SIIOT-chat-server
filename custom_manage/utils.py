@@ -1,6 +1,6 @@
 import boto3
 
-from siiot.loader import load_credential
+from SIIOT_chat_server.loader import load_credential
 
 ACCESS_KEY = load_credential("_AWS_ACCESS_KEY_ID","")
 SECRET_ACCESS_KEY = load_credential("_AWS_SECRET_ACCESS_KEY","")

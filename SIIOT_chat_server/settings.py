@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 from SIIOT_chat_server.loader import load_credential
 
+SETTING_DEV_DIC = load_credential("develop")
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -27,7 +29,7 @@ SECRET_KEY = load_credential("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '13.124.198.139']
 
 # Channels
 ASGI_APPLICATION = 'SIIOT_chat_server.routing.application'
@@ -72,7 +74,7 @@ THIRD_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
 
-    'corsheaders',
+    'corsheaders'
 ]
 
 INSTALLED_APPS += SECONDS_APPS + THIRD_APPS
@@ -105,16 +107,15 @@ TEMPLATES = [
     },
 ]
 
-
-WSGI_APPLICATION = 'SIIOT_chat_server.wsgi.application'
-
-
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': load_credential('siiot_database')
+    'default': SETTING_DEV_DIC["siiot_database"]
 }
+
+
+WSGI_APPLICATION = 'SIIOT_chat_server.wsgi.application'
 
 # Default user model
 AUTH_USER_MODEL = 'accounts.User'
@@ -155,7 +156,7 @@ SITE_ID = 1
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
+# STATIC_URL = '/static/'
 
 # Rest Framework - settings for pagination
 REST_FRAMEWORK = {
@@ -168,3 +169,30 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+# AWS
+AWS_ACCESS_KEY_ID = SETTING_DEV_DIC['S3']['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = SETTING_DEV_DIC['S3']['AWS_SECRET_ACCESS_KEY']
+AWS_DEFAULT_ACL = SETTING_DEV_DIC['S3']['AWS_DEFAULT_ACL']
+AWS_S3_REGION_NAME = SETTING_DEV_DIC['S3']['AWS_S3_REGION_NAME']
+AWS_S3_SIGNATURE_VERSION = SETTING_DEV_DIC['S3']['AWS_S3_SIGNATURE_VERSION']
+AWS_STORAGE_BUCKET_NAME = SETTING_DEV_DIC['S3']['AWS_STORAGE_BUCKET_NAME']
+
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_HOST = 's3.%s.amazonaws.com' % AWS_S3_REGION_NAME
+
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
+STATIC_LOCATION = 'statics'
+STATIC_URL = "https://%s/%s/" % (AWS_S3_HOST, STATIC_LOCATION)
+STATICFILES_STORAGE = 'SIIOT_chat_server.storage.StaticStorage'
+
+MEDIA_LOCATION = 'media'
+MEDIA_URL = "https://%s/%s/" % (AWS_S3_HOST, MEDIA_LOCATION)
+
+DEFAULT_FILE_STORAGE = 'SIIOT_chat_server.storage.CustomS3Boto3Storage'
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.0/howto/static-files/
+
+STATIC_ROOT = "https://%s/statics/" % AWS_S3_CUSTOM_DOMAIN
+MEDIA_ROOT = "https://%s/media/" % AWS_S3_CUSTOM_DOMAIN
