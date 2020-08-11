@@ -27,10 +27,13 @@ class ChatRoomSerializer(serializers.ModelSerializer):
     buyer = serializers.SerializerMethodField()
     product = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
+    last_message = serializers.SerializerMethodField()
+    updated_at = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatRoom
-        fields = ('id', 'product', 'deal', 'updated_at', 'buyer', 'seller', 'unread_count')
+        fields = ('id', 'product', 'deal', 'updated_at', 'buyer', 'seller',
+                  'unread_count', 'last_message')
 
     def get_product(self, obj):
         result = {
@@ -65,12 +68,21 @@ class ChatRoomSerializer(serializers.ModelSerializer):
             count = count + 1
         return count
 
+    def get_updated_at(self, obj):
+        updated_at = obj.updated_at
+        return '{}월{}일'.format(updated_at.strftime('%m'), updated_at.strftime('%d'))
+
+    def get_last_message(self, obj):
+        return obj.messages.last().text
+
 
 class ChatMessageReadSerializer(serializers.ModelSerializer):
     """
     쌓여진 ChatMessage 를 방에 deliver 할 때 or ChatMessage log를 참고하는 serializer 입니다.
     """
     message_image_url = serializers.SerializerMethodField()
+    owner = serializers.SerializerMethodField()
+    # created_at = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatMessage
@@ -81,6 +93,19 @@ class ChatMessageReadSerializer(serializers.ModelSerializer):
             return obj.images.image_url
         except:
             return None
+
+    def get_owner(self, obj):
+        result = {
+            'id': obj.owner.id,
+            'nickname': obj.owner.nickname,
+            'profile_image_url': obj.owner.profile.profile_image_url
+        }
+        return result
+
+    # def get_created_at(self, obj):
+    #     created_at = obj.created_at
+    #     return '{}.{}.{}.{}.{}'.format(created_at.strftime('20'+'%y'), created_at.strftime('%m'),
+    #                              created_at.strftime('%d'), created_at.strftime('%H'), created_at.strftime('%M'))
 
 
 class ChatMessageWriteSerializer(serializers.ModelSerializer):

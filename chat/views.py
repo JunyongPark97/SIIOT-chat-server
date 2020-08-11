@@ -1,16 +1,18 @@
 from django.utils.safestring import mark_safe
 import json, uuid
 
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
+from accounts.models import User
+from products.models import Product
 from chat.models import ChatRoom, ChatMessage, ChatMessageImages
 from chat.send_utils import MessageSender
 from django.shortcuts import render, get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from core.pagination import SiiotPagination
-from django.db.models import Q
+from django.db.models import Q, F
 from datetime import datetime
 
 from .serializers import ChatMessageReadSerializer, ChatMessageWriteSerializer, ChatRoomSerializer
@@ -36,10 +38,27 @@ def _get_sender(room_id):
                          room_id=room_id)
 
 
-class ChatRoomViewSet(viewsets.ReadOnlyModelViewSet):
+class ChatRoomViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
     queryset = ChatRoom.objects.filter(Q(buyer_active=True) | Q(seller_active=True))
     permission_classes = [IsAuthenticated, ]
     serializer_class = ChatRoomSerializer
+
+    def create(self, request, *args, **kwargs):
+        """
+        상품 detail page에서 문의하기 버튼을 눌렀을 때 ChatRoom object 생성하면서 chatroom id return
+        api : POST api/v1/chatroom/
+        data: {'seller_id': seller_id, 'buyer_id': buyer_id, 'product_id': product_id}
+        :return: id (Int)
+        """
+        data = request.data
+        seller_id = data.get('seller_id', None)
+        buyer_id = data.get('buyer_id', None)
+        product_id = data.get('product_id', None)
+        seller = get_object_or_404(User, pk=seller_id)
+        buyer = get_object_or_404(User, pk=buyer_id)
+        product = get_object_or_404(Product, pk=product_id)
+        chatroom, _ = ChatRoom.objects.get_or_create(seller=seller, buyer=buyer, product=product)
+        return Response({'room_id': chatroom.id}, status=status.HTTP_201_CREATED)
 
     def list(self, request, *args, **kwargs):
         """
@@ -49,7 +68,8 @@ class ChatRoomViewSet(viewsets.ReadOnlyModelViewSet):
         # 해당 유저가 속해있는 방 최신 message created_at 순서로 만든 후에 serializer 형태로 제공
         qs = self.get_queryset()
         user = request.user
-        chatroom_qs = qs.filter(Q(buyer=user) | Q(seller=user)).order_by('updated_at')
+        chatroom_qs = qs.filter(Q(buyer=user) | Q(seller=user)).exclude(created_at=F("updated_at"))\
+            .order_by('updated_at')
         serializer = self.get_serializer(chatroom_qs, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -133,8 +153,8 @@ class ChatMessageViewSet(viewsets.GenericViewSet):
         else:
             text = None
             image_key_list = request.data.get('image_key', None)
-            if not image_key_list:
-                Response(status=status.HTTP_404_NOT_FOUND)
+            if not image_key_list or not isinstance(image_key_list, list):
+                Response(status=status.HTTP_400_BAD_REQUEST)
         chat_room = get_object_or_404(ChatRoom, pk=pk)
         if not chat_room.buyer:
             chat_room.buyer_active = True
@@ -166,7 +186,7 @@ class ChatMessageViewSet(viewsets.GenericViewSet):
 
             sender = _get_sender(room_id=chat_room.id)
             if message_type == 1:
-                sender.deliver_message(chat_msg=new_message.text)
+                sender.deliver_message(chat_msg=new_message.text, owner=user.id)
             else:
                 for i in range(len(image_url_list)):
                     sender.deliver_image(image_url=image_url_list[i])

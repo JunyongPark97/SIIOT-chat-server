@@ -19,7 +19,7 @@ class ChatRoom(models.Model):
     buyer_active = models.BooleanField(default=True, null=True, help_text='구매자 웹소켓 채팅이 가능할 경우 True')
     deal = models.OneToOneField(Deal, help_text='채팅방에 연관된 deal id', null=True,
                                 related_name='chat_room', on_delete=models.SET_NULL)
-    product = models.OneToOneField(Product, help_text='채팅방에 연관된 product_id', null=True,
+    product = models.ForeignKey(Product, help_text='채팅방에 연관된 product_id', null=True,
                                    related_name='chat_room', on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
