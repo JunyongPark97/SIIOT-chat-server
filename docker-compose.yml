@@ -23,10 +23,10 @@ services:
 #        networks:
 #          - web-crawler-net
     siiot-chat:
-#        image: monde-bengal_web-crawler:0.2.2
-        build:
-            context: .
-            dockerfile: ./Dockerfile
+        image: siiot-chat-server_siiot-chat:0.0.3
+#        build:
+#            context: .
+#            dockerfile: ./Dockerfile
         ports:
             - "0.0.0.0:8001:8001"
         depends_on:

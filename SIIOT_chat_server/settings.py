@@ -14,6 +14,7 @@ import os
 from SIIOT_chat_server.loader import load_credential
 
 SETTING_DEV_DIC = load_credential("develop")
+SETTING_PRD_DIC = load_credential("production")
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -111,7 +112,7 @@ TEMPLATES = [
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': SETTING_DEV_DIC["siiot_database"]
+    'default': SETTING_PRD_DIC["siiot_database"]
 }
 
 
@@ -171,28 +172,57 @@ REST_FRAMEWORK = {
 }
 
 # AWS
-AWS_ACCESS_KEY_ID = SETTING_DEV_DIC['S3']['AWS_ACCESS_KEY_ID']
-AWS_SECRET_ACCESS_KEY = SETTING_DEV_DIC['S3']['AWS_SECRET_ACCESS_KEY']
-AWS_DEFAULT_ACL = SETTING_DEV_DIC['S3']['AWS_DEFAULT_ACL']
-AWS_S3_REGION_NAME = SETTING_DEV_DIC['S3']['AWS_S3_REGION_NAME']
-AWS_S3_SIGNATURE_VERSION = SETTING_DEV_DIC['S3']['AWS_S3_SIGNATURE_VERSION']
-AWS_STORAGE_BUCKET_NAME = SETTING_DEV_DIC['S3']['AWS_STORAGE_BUCKET_NAME']
+# AWS_ACCESS_KEY_ID = SETTING_DEV_DIC['S3']['AWS_ACCESS_KEY_ID']
+# AWS_SECRET_ACCESS_KEY = SETTING_DEV_DIC['S3']['AWS_SECRET_ACCESS_KEY']
+# AWS_DEFAULT_ACL = SETTING_DEV_DIC['S3']['AWS_DEFAULT_ACL']
+# AWS_S3_REGION_NAME = SETTING_DEV_DIC['S3']['AWS_S3_REGION_NAME']
+# AWS_S3_SIGNATURE_VERSION = SETTING_DEV_DIC['S3']['AWS_S3_SIGNATURE_VERSION']
+# AWS_STORAGE_BUCKET_NAME = SETTING_DEV_DIC['S3']['AWS_STORAGE_BUCKET_NAME']
+#
+# AWS_QUERYSTRING_AUTH = False
+# AWS_S3_HOST = 's3.%s.amazonaws.com' % AWS_S3_REGION_NAME
+#
+# AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
+# STATIC_LOCATION = 'statics'
+# STATIC_URL = "https://%s/%s/" % (AWS_S3_HOST, STATIC_LOCATION)
+# STATICFILES_STORAGE = 'SIIOT_chat_server.storage.StaticStorage'
+#
+# MEDIA_LOCATION = 'media'
+# MEDIA_URL = "https://%s/%s/" % (AWS_S3_HOST, MEDIA_LOCATION)
+#
+# DEFAULT_FILE_STORAGE = 'SIIOT_chat_server.storage.CustomS3Boto3Storage'
+#
+# # Static files (CSS, JavaScript, Images)
+# # https://docs.djangoproject.com/en/3.0/howto/static-files/
+#
+# STATIC_ROOT = "https://%s/statics/" % AWS_S3_CUSTOM_DOMAIN
+# MEDIA_ROOT = "https://%s/media/" % AWS_S3_CUSTOM_DOMAIN
+
+# AWS
+AWS_ACCESS_KEY_ID = SETTING_PRD_DIC['S3']['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = SETTING_PRD_DIC['S3']['AWS_SECRET_ACCESS_KEY']
+AWS_DEFAULT_ACL = SETTING_PRD_DIC['S3']['AWS_DEFAULT_ACL']
+AWS_S3_REGION_NAME = SETTING_PRD_DIC['S3']['AWS_S3_REGION_NAME']
+AWS_S3_SIGNATURE_VERSION = SETTING_PRD_DIC['S3']['AWS_S3_SIGNATURE_VERSION']
+AWS_STORAGE_BUCKET_NAME = SETTING_PRD_DIC['S3']['AWS_STORAGE_BUCKET_NAME']
 
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_HOST = 's3.%s.amazonaws.com' % AWS_S3_REGION_NAME
 
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
+
 STATIC_LOCATION = 'statics'
 STATIC_URL = "https://%s/%s/" % (AWS_S3_HOST, STATIC_LOCATION)
-STATICFILES_STORAGE = 'SIIOT_chat_server.storage.StaticStorage'
+STATICFILES_STORAGE = 'siiot.storage.StaticStorage'
 
 MEDIA_LOCATION = 'media'
 MEDIA_URL = "https://%s/%s/" % (AWS_S3_HOST, MEDIA_LOCATION)
-
-DEFAULT_FILE_STORAGE = 'SIIOT_chat_server.storage.CustomS3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'siiot.storage.CustomS3Boto3Storage'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_ROOT = "https://%s/statics/" % AWS_S3_CUSTOM_DOMAIN
 MEDIA_ROOT = "https://%s/media/" % AWS_S3_CUSTOM_DOMAIN
+
+APPEND_SLASH = True

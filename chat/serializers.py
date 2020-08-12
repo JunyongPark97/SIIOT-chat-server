@@ -82,7 +82,7 @@ class ChatMessageReadSerializer(serializers.ModelSerializer):
     """
     message_image_url = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()
-    # created_at = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatMessage
@@ -95,17 +95,13 @@ class ChatMessageReadSerializer(serializers.ModelSerializer):
             return None
 
     def get_owner(self, obj):
-        result = {
-            'id': obj.owner.id,
-            'nickname': obj.owner.nickname,
-            'profile_image_url': obj.owner.profile.profile_image_url
-        }
-        return result
+        return obj.owner.id
 
-    # def get_created_at(self, obj):
-    #     created_at = obj.created_at
-    #     return '{}.{}.{}.{}.{}'.format(created_at.strftime('20'+'%y'), created_at.strftime('%m'),
-    #                              created_at.strftime('%d'), created_at.strftime('%H'), created_at.strftime('%M'))
+    def get_created_at(self, obj):
+        created_at = obj.created_at
+        return str(created_at)
+        # return '{}.{}.{}.{}.{}'.format(created_at.strftime('20'+'%y'), created_at.strftime('%m'),
+        #                          created_at.strftime('%d'), created_at.strftime('%H'), created_at.strftime('%M'))
 
 
 class ChatMessageWriteSerializer(serializers.ModelSerializer):

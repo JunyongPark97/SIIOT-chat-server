@@ -74,6 +74,7 @@ RUN apt-get install -y mariadb-client
 RUN apt-get install -y python3-dev default-libmysqlclient-dev gcc
 RUN pip install mysqlclient==1.4.4
 
+
 # sort out permissions
 RUN chown -R www-data:www-data /mondeique_chat
 

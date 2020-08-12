@@ -1,14 +1,24 @@
 from chat.models import ChatRoom
 from asgiref.sync import async_to_sync
+from django.core.serializers.json import DjangoJSONEncoder
+import json, datetime
 
 
-def send_new_message(channel_layer, room_group_name, message, owner):
+def default(o):
+    if isinstance(o, (datetime.date, datetime.datetime)):
+        return o.isoformat()
+
+
+def send_new_message(channel_layer, room_group_name, message, owner, created_at):
     async_to_sync(channel_layer.group_send)(
         room_group_name,
         {
             'type': 'chat_message',
+            'message_type': 1,
             'message': message,
-            'owner': owner
+            'owner': owner,
+            'created_at': str(created_at),
+            'message_image_url': ''
         }
     )
 
@@ -36,8 +46,8 @@ class MessageSender(object):
     def room(self):
         return ChatRoom.objects.get(id=self.room_id)
 
-    def deliver_message(self, chat_msg, owner):
-        send_new_message(self.channel_layer, self.room_group_name, chat_msg, owner)
+    def deliver_message(self, chat_msg, owner, created_at):
+        send_new_message(self.channel_layer, self.room_group_name, chat_msg, owner, created_at)
 
     def deliver_image(self, chat_img):
         send_new_image(self.channel_layer, self.room_group_name, chat_img)

@@ -133,7 +133,7 @@ class ChatMessageViewSet(viewsets.GenericViewSet):
             paginator = SiiotPagination()
             page = paginator.paginate_queryset(message_qs, request)
             serializer = self.get_serializer(page, many=True)
-            return paginator.get_paginated_response(serializer.data)
+            return paginator.get_paginated_response(data=serializer.data)
 
     @action(methods=['post'], detail=True)
     def message(self, request, pk):
@@ -175,8 +175,8 @@ class ChatMessageViewSet(viewsets.GenericViewSet):
             # new_message = ChatMessage(room=chat_room, text=text, owner=user)
             # new_message.save()
             # image save
-            if not image_key_list or not isinstance(image_key_list, list):
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+            # if not image_key_list or not isinstance(image_key_list, list):
+            #     return Response(status=status.HTTP_400_BAD_REQUEST)
 
             image_url_list = []
             # image object create
@@ -186,7 +186,7 @@ class ChatMessageViewSet(viewsets.GenericViewSet):
 
             sender = _get_sender(room_id=chat_room.id)
             if message_type == 1:
-                sender.deliver_message(chat_msg=new_message.text, owner=user.id)
+                sender.deliver_message(chat_msg=new_message.text, owner=user.id, created_at=datetime.now())
             else:
                 for i in range(len(image_url_list)):
                     sender.deliver_image(image_url=image_url_list[i])
