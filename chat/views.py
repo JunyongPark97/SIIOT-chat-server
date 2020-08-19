@@ -69,7 +69,7 @@ class ChatRoomViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
         qs = self.get_queryset()
         user = request.user
         chatroom_qs = qs.filter(Q(buyer=user) | Q(seller=user)).exclude(created_at=F("updated_at"))\
-            .order_by('updated_at')
+            .order_by('-updated_at')
         serializer = self.get_serializer(chatroom_qs, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
