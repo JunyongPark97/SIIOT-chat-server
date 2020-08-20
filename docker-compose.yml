@@ -23,7 +23,7 @@ services:
 #        networks:
 #          - web-crawler-net
     siiot-chat:
-        image: siiot-chat-server_siiot-chat:0.0.3
+        image: siiot-chat-server_siiot-chat:0.0.4
 #        build:
 #            context: .
 #            dockerfile: ./Dockerfile
