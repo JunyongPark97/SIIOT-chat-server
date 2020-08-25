@@ -30,7 +30,7 @@ SECRET_KEY = load_credential("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '13.124.198.139', '*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '13.124.198.139']
 
 # Channels
 ASGI_APPLICATION = 'SIIOT_chat_server.routing.application'

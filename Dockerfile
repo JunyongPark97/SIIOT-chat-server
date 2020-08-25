@@ -63,10 +63,10 @@ RUN apt-get -y install nginx
 RUN apt-get -y install supervisor
 
 # make folder
-COPY . /mondeique_chat
 WORKDIR /mondeique_chat
 
-# requirements install 
+# requirements install
+COPY requirements.txt /mondeique_chat
 RUN pip install -r requirements.txt
 
 # mysqlclient install
